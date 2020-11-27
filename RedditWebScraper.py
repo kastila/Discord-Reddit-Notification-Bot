@@ -35,8 +35,7 @@ def ScrapePosts(sub, keywords):
 def sub_exists(sub):
     reddit = logIn()
     try: 
-        results = reddit.subreddits.search_by_name(sub,include_nsfw=True, exact=True)
-        if len(results) > 0:
+        if len(reddit.subreddits.search_by_name(sub,include_nsfw=True, exact=True)) > 0:
             return True
         else:
             return False
