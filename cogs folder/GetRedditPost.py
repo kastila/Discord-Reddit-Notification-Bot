@@ -104,10 +104,14 @@ class GetRedditPost(commands.Cog):
             guilds = json.load(file)
         index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
 
+
         msg = ""
         for subReddit in guilds[index]['search']:
             msg += "r/" + str(subReddit) + ": " + str(guilds[index]['search'][subReddit]) + '\n'
-        await ctx.send(msg)
+        if msg:
+            await ctx.send(msg)
+        else:
+            await ctx.send("Currently not searching in any Subreddits. Try !addSubreddit to add one")
 
     @commands.command(description = 'Change channel to send found reddit posts\nInput: name of channel')
     async def changeChannelFeed(self,ctx,channelName):
@@ -119,7 +123,7 @@ class GetRedditPost(commands.Cog):
         if channel is not None:
             guilds[index]['textChannel'] = channel.id
             await ctx.send('Channel ' + str(channel.name) + ' is now set currently set to receive posts')
-        else
+        else:
             await ctx.send('Channel ' + channelName + ' not Found')
 
         with open('guilds.json','w') as file:
