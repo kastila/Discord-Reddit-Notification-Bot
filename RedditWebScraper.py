@@ -29,13 +29,16 @@ def ScrapePosts(sub, keywords):
                         break
         time.sleep(1)            
     except Exception: 
-        time.sleep(10)
+        time.sleep(5)
     return posts
 
 def sub_exists(sub):
     reddit = logIn()
     try: 
-        reddit.subreddits.search_by_name(sub,include_nsfw=True, exact=True)
-        return True
+        results = reddit.subreddits.search_by_name(sub,include_nsfw=True, exact=True)
+        if len(results) > 0:
+            return True
+        else:
+            return False
     except Exception:
         return False
