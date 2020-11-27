@@ -21,7 +21,7 @@ def ScrapePosts(sub, keywords):
         print("reddit script running")
 
         # checks for any new post
-        for submission in subreddit.new(limit = 100):
+        for submission in subreddit.new(limit = 30):
             if(keywords == {'Everything*':None}):
                 posts.append(submission)
             else:
