@@ -15,16 +15,17 @@ async def on_ready():
 
     for i, guild in enumerate(client.guilds):
         guildSaved = next((item for item in guildsData if item["guildID"] == guild.id), False)
-        textChannelSaved = next((item for item in guild.text_channels if guildsData[i]['textChannel'] == item.id), False)
         if not guildSaved:
-                info = {
+            info = {
                 "guildID":guild.id,
                 "textChannel":guild.text_channels[0].id,
                 "search":{}
                     }
-                guildsData.append(info)
-        if not textChannelSaved:
-            guildsData[i]['textChannel'] = guild.text_channels[0].id
+            guildsData.append(info)
+        elif len(guildsData) == len(client.guilds):
+            textChannelSaved = next((item for item in guild.text_channels if guildsData[i]['textChannel'] == item.id), False)
+            if not textChannelSaved:
+                guildsData[i]['textChannel'] = guild.text_channels[0].id
                 
 
 
