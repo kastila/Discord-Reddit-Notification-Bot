@@ -30,13 +30,15 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
         index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        
 
-        if RedditWebScraper.sub_exists(subReddit):
-            if not(subReddit in guilds[index]['search']):
-                guilds[index]['search'][subReddit] = []
+        subName = RedditWebScraper.getSubredditName(subReddit)
+        if subName:
+            if not(subName in guilds[index]['search']):
+                guilds[index]['search'][subName] = []
                 for word in keyWords:
-                    if not(word in guilds[index]['search'][subReddit]):
-                        guilds[index]['search'][subReddit].append(word)
+                    if not(word in guilds[index]['search'][subName]):
+                        guilds[index]['search'][subName].append(word)
                 await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
             else:
                 await ctx.send("Already searching in r/" + subReddit)
@@ -58,7 +60,7 @@ class GetRedditPost(commands.Cog):
             await ctx.send( "Removed r/" + "from search\n" 
                             "Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
         except KeyError:
-            await ctx.send("Was not searching in r/" + subReddit.content)
+            await ctx.send("Was not searching in r/" + subReddit)
 
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
@@ -129,13 +131,23 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
+    @addSubreddit.error
+    async def cooldown_error(self,ctx, error):
+        if isinstance(error, commands.InvalidEndOfQuotedStringError) or isinstance(error, commands.ExpectedClosingQuoteError):
+            await ctx.send("Each \" must have an accompaning closing \"")
+        else:
+            raise error
+    
 async def findPosts(subReddits,keyWords,channel):
-    history =  [ msg.content for msg in await channel.history(limit = 100).flatten()]
-    for i,sub in enumerate(subReddits):
-        posts = RedditWebScraper.ScrapePosts(sub, keyWords[i])
-        for p in posts:
-            if p.url not in history:
-                await channel.send(p.url)             
+    try:
+        history =  [ msg.content for msg in await channel.history(limit = 100).flatten()]
+        for i,sub in enumerate(subReddits):
+            posts = RedditWebScraper.ScrapePosts(sub, keyWords[i])
+            for p in posts:
+                if p.url not in history:
+                    await channel.send(p.url)
+    except AttributeError:
+        pass              
         
 
 def setup(client):

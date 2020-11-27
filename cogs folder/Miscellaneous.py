@@ -30,7 +30,7 @@ class Miscellaneous(commands.Cog):
             channel = channel = self.client.get_channel(guild.text_channels[0].id)
             await channel.send('Thanks for using Reddit Post Alert Bot\n'+
                                 'Channel ' + str(guild.text_channels[0]) + ' is currently set to receive posts\n' +
-                                'Use !changeChannelFeed to change this and !addSubreddit to add subreddits to search in')
+                                'Use !changeChannelFeed to change channelFeed and !addSubreddit to add subreddits to search in')
         except IndexError:
             to_leave = self.client.get_guild(guild.id)
             await to_leave.leave()
@@ -48,6 +48,7 @@ class Miscellaneous(commands.Cog):
 
         with open('guilds.json','w') as file:
             json.dump(guildsData,file,indent = 2)  
+
 
 def setup(client):
     client.add_cog(Miscellaneous(client))
