@@ -19,7 +19,6 @@ async def on_ready():
             "guildID":guild.id,
             "textChannel":guild.text_channels[0].id,
             "search":{
-                    "VALORANT":['viper','smoke']
                     }
                 }
             guildsData.append(info)
