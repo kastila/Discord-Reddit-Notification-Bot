@@ -119,6 +119,8 @@ class GetRedditPost(commands.Cog):
         if channel is not None:
             guilds[index]['textChannel'] = channel.id
             await ctx.send('Channel ' + str(channel.name) + ' is now set currently set to receive posts')
+        else
+            await ctx.send('Channel ' + channelName + ' not Found')
 
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
