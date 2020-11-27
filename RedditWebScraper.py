@@ -32,12 +32,11 @@ def ScrapePosts(sub, keywords):
         time.sleep(5)
     return posts
 
-def sub_exists(sub):
+def getSubredditName(sub):
     reddit = logIn()
     try: 
-        if len(reddit.subreddits.search_by_name(sub,include_nsfw=True, exact=True)) > 0:
-            return True
-        else:
-            return False
+        subreddit = reddit.subreddit(sub)
+        subreddit.id
+        return subreddit.display_name
     except Exception:
-        return False
+        return ""
