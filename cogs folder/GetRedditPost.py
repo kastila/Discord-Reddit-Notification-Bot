@@ -65,6 +65,27 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
+    @commands.command(description='Changes search critera to post all new posts from a subreddit' ,usage ='<Subreddit name>')
+    async def searchAllNew(self,ctx,subReddit):
+        with open('guilds.json','r') as file:
+            guilds = json.load(file)
+        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+
+        subName = RedditWebScraper.getSubredditName(subReddit)
+        if subName:
+            if not(subName in guilds[index]['search']):
+                guilds[index]['search'][subName] = {'Everything*':None}
+                await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+            elif guilds[index]['search'][subName] != {'everything*':None}:
+                guilds[index]['search'][subName] = {'Everything*':None}
+                await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+            else:
+                await ctx.send("Already searching all new posts in r/" + subReddit)
+        else:
+            await ctx.send("r/" + subReddit + " not found")
+
+        with open('guilds.json','w') as file:
+            json.dump(guilds,file,indent = 2)
 
     @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add>')
     async def addKeywords(self,ctx,subReddit,*keyWords):
@@ -73,6 +94,8 @@ class GetRedditPost(commands.Cog):
         index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
 
         if subReddit in guilds[index]['search']:
+            if guilds[index]['search'][subReddit] == {'Everything*':None}:
+                guilds[index]['search'][subReddit] = []
             for word in keyWords:
                 if not(word in guilds[index]['search'][subReddit]):
                     guilds[index]['search'][subReddit].append(word)
@@ -90,10 +113,13 @@ class GetRedditPost(commands.Cog):
         index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
 
         if subReddit in guilds[index]['search']:
-            for word in keyWords:
-                if word in guilds[index]['search'][subReddit]:
-                    guilds[index]['search'][subReddit].remove(word)
-            await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
+            if guilds[index]['search'][subReddit] != {'Everything*':None}:
+                for word in keyWords:
+                    if word in guilds[index]['search'][subReddit]:
+                        guilds[index]['search'][subReddit].remove(word)
+                await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
+            else:
+                await ctx.send("Currently searching in all new post in r/" + subReddit + " no keywords to remove")
         else:
             await ctx.send("Was not searching in r/" + subReddit )
 
@@ -109,7 +135,11 @@ class GetRedditPost(commands.Cog):
 
         msg = ""
         for subReddit in guilds[index]['search']:
-            msg += f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
+            if guilds[index]['search'][subReddit] == {'Everything*':None}:
+                msg += f"r/{str(subReddit)}: Searching all posts*\n"
+            else:
+                msg += f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
+
         if msg:
             await ctx.send(msg)
         else:

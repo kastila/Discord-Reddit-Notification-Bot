@@ -21,12 +21,16 @@ def ScrapePosts(sub, keywords):
         print("reddit script running")
 
         # checks for any new post
-        for submission in subreddit.new():
+        for submission in subreddit.new(limit = 25):
+            if(keywords == {'Everything*':None}):
+                posts.append(submission)
+            else:
                 for keyword in keywords:
                     if 0 in[word.find(keyword) for word in submission.title.lower().split()]:
                         print("found: " + submission.title )
                         posts.append(submission)
                         break
+
         time.sleep(1)            
     except Exception: 
         time.sleep(5)
