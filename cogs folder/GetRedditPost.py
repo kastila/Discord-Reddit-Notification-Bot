@@ -25,8 +25,8 @@ class GetRedditPost(commands.Cog):
             await asyncio.sleep(900)
 
 
-    @commands.command(description='Adds a subReddit to search.\nInputs: Subreddit name and then keyterms to search for.')
-    async def addSubreddit(self,ctx,subReddit, *keyWords):
+    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <optional keywords>')
+    async def addSubreddit(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
         index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
@@ -49,7 +49,7 @@ class GetRedditPost(commands.Cog):
             json.dump(guilds,file,indent = 2)
 
 
-    @commands.command(description='Removes a subReddit from the search.\nInputs: Subreddit name.')
+    @commands.command(description='Removes a subReddit from the search', usage ='<Subreddit name>')
     async def removeSubreddit(self,ctx,subReddit):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -66,7 +66,7 @@ class GetRedditPost(commands.Cog):
             json.dump(guilds,file,indent = 2)
 
 
-    @commands.command(description='Adds keyterms to a subReddit\'s search critera.\nInputs: Subreddit name then the keyterms to add.')
+    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add>')
     async def addKeywords(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -83,7 +83,7 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @commands.command(description='Remove keyterms from a subReddit\'s search critera.\nInputs: Subreddit name then the keyterms to remove.')
+    @commands.command(description='Remove keyterms from a subReddit\'s search critera',usage ='<Subreddit name> <keyterms to remove>')
     async def removeKeywords(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -109,13 +109,13 @@ class GetRedditPost(commands.Cog):
 
         msg = ""
         for subReddit in guilds[index]['search']:
-            msg += "r/" + str(subReddit) + ": " + str(guilds[index]['search'][subReddit]) + '\n'
+            msg += f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
         if msg:
             await ctx.send(msg)
         else:
             await ctx.send("Currently not searching in any Subreddits. Try !addSubreddit to add one")
 
-    @commands.command(description = 'Change channel to send found reddit posts\nInput: name of channel')
+    @commands.command(description = 'Change channel to send found reddit posts', usage ='<name of channel>')
     async def changeChannelFeed(self,ctx,channelName):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -131,8 +131,8 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @addSubreddit.error
-    async def cooldown_error(self,ctx, error):
+    @commands.Cog.listener()
+    async def on_command_error(self,ctx, error):
         if isinstance(error, commands.InvalidEndOfQuotedStringError) or isinstance(error, commands.ExpectedClosingQuoteError):
             await ctx.send("Each \" must have an accompaning closing \"")
         else:
