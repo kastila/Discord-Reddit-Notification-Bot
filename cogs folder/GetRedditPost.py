@@ -170,7 +170,7 @@ class GetRedditPost(commands.Cog):
     
 async def findPosts(subReddits,keyWords,channel):
     try:
-        history =  [ msg.content for msg in await channel.history(limit = 500).flatten()]
+        history =  [ msg.content for msg in await channel.history(limit = 1000).flatten()]
         for i,sub in enumerate(subReddits):
             posts = RedditWebScraper.ScrapePosts(sub, keyWords[i])
             for p in posts:
