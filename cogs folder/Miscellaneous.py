@@ -29,7 +29,7 @@ class Miscellaneous(commands.Cog):
 
             channel = self.client.get_channel(guild.text_channels[0].id)
             await channel.send('Thanks for using Reddit Post Alert Bot\n'+
-                                'Channel ' + str(guild.text_channels[0]) + ' is currently set to receive posts\n' +
+                                'Text channel [' + str(guild.text_channels[0]) + '] is currently set to receive posts\n' +
                                 'Use !changeChannelFeed to change channelFeed and !addSubreddit to add subreddits to search in')
         except IndexError:
             to_leave = self.client.get_guild(guild.id)
