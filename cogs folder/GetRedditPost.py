@@ -174,8 +174,8 @@ async def findPosts(subReddits,keyWords,channel):
         for i,sub in enumerate(subReddits):
             posts = RedditWebScraper.ScrapePosts(sub, keyWords[i])
             for p in posts:
-                if p.url not in history:
-                    await channel.send(p.url)
+                if p.permalink not in history:
+                    await channel.send(p.permalink)
     except AttributeError:
         pass              
         
