@@ -38,6 +38,7 @@ def ScrapePosts(sub, keywords):
                             if c in flair:
                                 flair = flair.replace(c," ")
                         flair.strip()
+
                         if keyword == flair:
                             posts.append(submission)
                             break
