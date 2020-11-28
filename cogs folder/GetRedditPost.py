@@ -52,7 +52,7 @@ class GetRedditPost(commands.Cog):
             json.dump(guilds,file,indent = 2)
 
 
-    @commands.command(description='Removes a subReddit from the search', usage ='<Subreddit name>')
+    @commands.command(description='Removes a subReddit from the search', usage ='<Subreddit name(case sensitive)>')
     async def removeSubreddit(self,ctx,subReddit):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
