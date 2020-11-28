@@ -1,8 +1,6 @@
 import praw
-import re
 import os
 import time
-import re
 
 def logIn():
     username = os.getenv('REDDIT_BOT_USERNAME')
@@ -21,21 +19,26 @@ def ScrapePosts(sub, keywords):
         print("reddit script running")
 
         # checks for any new post
-        for submission in subreddit.new(limit = 30):
+        for submission in subreddit.new(limit = 35):
             if(keywords == {'Everything*':None}):
                 posts.append(submission)
             else:
                 for keyword in keywords:
                     title = submission.title.lower()
-                    for c in "\"[]{}()*_":
+                    for c in "\"[]{}()*_,":
                         if c in title:
                             title = title.replace(c," ")
-  
-                    if 0 in [word.find(keyword) for word in title.split()]:
+
+                    if True in [word.startswith(keyword) for word in title.split()]:
                         posts.append(submission)
                         break
                     elif submission.link_flair_text:
-                        if keyword == submission.link_flair_text.lower():
+                        flair = submission.link_flair_text.lower()
+                        for c in "\"[]{}()*_,":
+                            if c in flair:
+                                flair = flair.replace(c," ")
+                        flair.strip()
+                        if keyword == flair:
                             posts.append(submission)
                             break
         time.sleep(2)            
