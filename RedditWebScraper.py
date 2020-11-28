@@ -2,6 +2,7 @@ import praw
 import re
 import os
 import time
+import re
 
 def logIn():
     username = os.getenv('REDDIT_BOT_USERNAME')
@@ -16,6 +17,7 @@ def ScrapePosts(sub, keywords):
     posts = []
     try:
         
+ 
         subreddit = reddit.subreddit(sub)
 
         print("reddit script running")
@@ -26,7 +28,11 @@ def ScrapePosts(sub, keywords):
                 posts.append(submission)
             else:
                 for keyword in keywords:
-                    if 0 in[word.find(keyword) for word in submission.title.lower().split()]:
+                    title = submission.title.lower()
+                    for c in "\"'/[]{}()*-_":
+                        if c in title:
+                            title = title.replace(c," ")
+                    if 0 in[word.find(keyword) for word in title.split()]:
                         print("found: " + submission.title )
                         posts.append(submission)
                         break

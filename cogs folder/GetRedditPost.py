@@ -25,7 +25,7 @@ class GetRedditPost(commands.Cog):
             await asyncio.sleep(900)
 
 
-    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <optional keywords>')
+    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <optional keywords>\n\'/[]{}()*-_ characters will be omitited from keywords')
     async def addSubreddit(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -38,6 +38,9 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subName] = []
                 for word in keyWords:
                     if not(word in guilds[index]['search'][subName]):
+                        for c in "'/[]{}()*-_":
+                            if c in word:
+                                word = word.replace(c,"")
                         guilds[index]['search'][subName].append(word)
                 await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
             else:
@@ -87,7 +90,7 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add>')
+    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add>\n\'/[]{}()*-_ characters will be omitited from keywords')
     async def addKeywords(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -98,6 +101,9 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subReddit] = []
             for word in keyWords:
                 if not(word in guilds[index]['search'][subReddit]):
+                    for c in "'/[]{}()*-_":
+                            if c in word:
+                                word = word.replace(c,"")
                     guilds[index]['search'][subReddit].append(word)
             await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
         else:
