@@ -16,8 +16,6 @@ def ScrapePosts(sub, keywords):
     reddit = logIn()
     posts = []
     try:
-        
- 
         subreddit = reddit.subreddit(sub)
 
         print("reddit script running")
@@ -29,15 +27,14 @@ def ScrapePosts(sub, keywords):
             else:
                 for keyword in keywords:
                     title = submission.title.lower()
-                    for c in "\"'/[]{}()*-_":
+                    for c in "\"[]{}()*_":
                         if c in title:
                             title = title.replace(c," ")
-                    if 0 in[word.find(keyword) for word in title.split()]:
-                        print("found: " + submission.title )
+
+                    if 0 in[word.find(keyword) for word in title.split()] or keyword == submission.link_flair_text.lower():
                         posts.append(submission)
                         break
-
-        time.sleep(1)            
+        time.sleep(2)            
     except Exception: 
         time.sleep(5)
     return posts

@@ -25,7 +25,7 @@ class GetRedditPost(commands.Cog):
             await asyncio.sleep(900)
 
 
-    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <optional keywords>\n\'/[]{}()*-_ characters will be omitited from keywords')
+    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name(not case sensitive)> <optional keywords(includes flairs)>\n[]{}()*_ characters will be omitited from keywords')
     async def addSubreddit(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -38,7 +38,7 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subName] = []
                 for word in keyWords:
                     if not(word in guilds[index]['search'][subName]):
-                        for c in "'/[]{}()*-_":
+                        for c in "[]{}()*_":
                             if c in word:
                                 word = word.replace(c,"")
                         guilds[index]['search'][subName].append(word)
@@ -90,7 +90,7 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add>\n\'/[]{}()*-_ characters will be omitited from keywords')
+    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name(case sensitive)> <keyterms to add(includes flairs)>\n[]{}()*_ characters will be omitited from keywords')
     async def addKeywords(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -101,10 +101,10 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subReddit] = []
             for word in keyWords:
                 if not(word in guilds[index]['search'][subReddit]):
-                    for c in "'/[]{}()*-_":
+                    for c in "[]{}()*_":
                             if c in word:
                                 word = word.replace(c,"")
-                    guilds[index]['search'][subReddit].append(word)
+                    guilds[index]['search'][subReddit].append(word.lower())
             await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
         else:
             await ctx.send("Was not searching in r/" + subReddit )
@@ -112,7 +112,7 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @commands.command(description='Remove keyterms from a subReddit\'s search critera',usage ='<Subreddit name> <keyterms to remove>')
+    @commands.command(description='Remove keyterms from a subReddit\'s search critera',usage ='<Subreddit name(case sensitive)> <keyterms to remove>')
     async def removeKeywords(self,ctx,subReddit,*keyWords):
         with open('guilds.json','r') as file:
             guilds = json.load(file)
@@ -122,7 +122,7 @@ class GetRedditPost(commands.Cog):
             if guilds[index]['search'][subReddit] != {'Everything*':None}:
                 for word in keyWords:
                     if word in guilds[index]['search'][subReddit]:
-                        guilds[index]['search'][subReddit].remove(word)
+                        guilds[index]['search'][subReddit].remove(word.lower())
                 await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
             else:
                 await ctx.send("Currently searching in all new post in r/" + subReddit + " no keywords to remove")
@@ -180,7 +180,7 @@ async def findPosts(subReddits,keyWords,channel):
         for i,sub in enumerate(subReddits):
             posts = RedditWebScraper.ScrapePosts(sub, keyWords[i])
             for p in posts:
-                line = f"Title: {p.title} {p.url}"
+                line = f"r/{sub}: {p.title} {p.url}"
                 if line not in history:
                     await channel.send(line)
     except AttributeError:
