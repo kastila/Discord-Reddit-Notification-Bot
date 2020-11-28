@@ -27,11 +27,8 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name(not case sensitive)> <optional keywords(includes flairs)>\n[]{}()*_ characters will be omitited from keywords')
     async def addSubreddit(self,ctx,subReddit,*keyWords):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id) 
         
-
         subName = RedditWebScraper.getSubredditName(subReddit)
         if subName:
             if not(subName in guilds[index]['search']):
@@ -55,9 +52,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Removes a subReddit from the search', usage ='<Subreddit name(case sensitive)>')
     async def removeSubreddit(self,ctx,subReddit):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id)
 
         try:
             del guilds[index]['search'][subReddit]
@@ -71,9 +66,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Changes search critera to post all new posts from a subreddit' ,usage ='<Subreddit name>')
     async def searchAllNew(self,ctx,subReddit):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id)
 
         subName = RedditWebScraper.getSubredditName(subReddit)
         if subName:
@@ -93,9 +86,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name(case sensitive)> <keyterms to add(includes flairs)>\n[]{}()*_ characters will be omitited from keywords')
     async def addKeywords(self,ctx,subReddit,*keyWords):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id)
 
         if subReddit in guilds[index]['search']:
             if guilds[index]['search'][subReddit] == {'Everything*':None}:
@@ -116,9 +107,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Remove keyterms from a subReddit\'s search critera',usage ='<Subreddit name(case sensitive)> <keyterms to remove>')
     async def removeKeywords(self,ctx,subReddit,*keyWords):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id)
 
         if subReddit in guilds[index]['search']:
             if guilds[index]['search'][subReddit] != {'Everything*':None}:
@@ -135,20 +124,24 @@ class GetRedditPost(commands.Cog):
             json.dump(guilds,file,indent = 2)
 
     @commands.command(description = 'Lists subreddits being searched in and thier respective search keyterms')
-    async def listSearch(self,ctx):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+    async def listInfo(self,ctx):
+        index,guilds = getGuildsInJson(ctx.guild.id)
+        channelName = self.client.get_channel(guilds[index]['textChannel']).name
 
-
-        msg = ""
+        msg = f"Sending post to text channel [{channelName}]\n"
         for subReddit in guilds[index]['search']:
             if guilds[index]['search'][subReddit] == {'Everything*':None}:
-                msg += f"r/{str(subReddit)}: Searching all posts*\n"
+                msgAdd = f"r/{str(subReddit)}: Searching all posts*\n"
             elif not guilds[index]['search'][subReddit]:
-                msg += f"r/{str(subReddit)}: No keywords given\n"
+                msgAdd = f"r/{str(subReddit)}: No keywords given\n"
             else:
-                msg += f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
+                msgAdd = f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
+
+            if(len(msg) > 2000):
+                await ctx.send(msg)
+                msg = msgAdd
+            else:
+                msg += msgAdd
 
         if msg:
             await ctx.send(msg)
@@ -157,9 +150,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description = 'Change channel to send found reddit posts', usage ='<name of channel>')
     async def changeChannelFeed(self,ctx,channelName):
-        with open('guilds.json','r') as file:
-            guilds = json.load(file)
-        index = next((i for i,item in enumerate(guilds) if item["guildID"] == int(ctx.guild.id)), None)
+        index,guilds = getGuildsInJson(ctx.guild.id)
 
         channel = discord.utils.get(ctx.guild.channels, name=channelName)
         if channel is not None:
@@ -190,6 +181,10 @@ async def findPosts(subReddits,keyWords,channel):
     except AttributeError:
         pass              
         
+def getGuildsInJson(guildID):
+    with open('guilds.json','r') as file:
+            guilds = json.load(file)
+    return next((i for i,item in enumerate(guilds) if item["guildID"] == int(guildID)), None), guilds
 
 def setup(client):
     client.add_cog(GetRedditPost(client))

@@ -25,9 +25,7 @@ async def on_ready():
         elif len(guildsData) == len(client.guilds):
             textChannelSaved = next((item for item in guild.text_channels if guildsData[i]['textChannel'] == item.id), False)
             if not textChannelSaved:
-                guildsData[i]['textChannel'] = guild.text_channels[0].id
-                
-
+                guildsData[i]['textChannel'] = guild.text_channels[0].id                
 
     with open('guilds.json','w') as file:
         json.dump(guildsData,file,indent = 2)  

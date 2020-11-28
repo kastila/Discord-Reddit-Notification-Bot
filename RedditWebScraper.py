@@ -30,12 +30,17 @@ def ScrapePosts(sub, keywords):
                     for c in "\"[]{}()*_":
                         if c in title:
                             title = title.replace(c," ")
-
-                    if 0 in [word.find(keyword) for word in title.split()] or keyword == submission.link_flair_text.lower():
+  
+                    if 0 in [word.find(keyword) for word in title.split()]:
                         posts.append(submission)
                         break
+                    elif submission.link_flair_text:
+                        if keyword == submission.link_flair_text.lower():
+                            posts.append(submission)
+                            break
         time.sleep(2)            
     except Exception: 
+        raise error
         time.sleep(5)
     return posts
 
@@ -46,4 +51,4 @@ def getSubredditName(sub):
         subreddit.id
         return subreddit.display_name
     except Exception:
-        return ""
+        return None
