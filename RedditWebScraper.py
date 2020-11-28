@@ -31,7 +31,7 @@ def ScrapePosts(sub, keywords):
                         if c in title:
                             title = title.replace(c," ")
 
-                    if 0 in[word.find(keyword) for word in title.split()] or keyword == submission.link_flair_text.lower():
+                    if 0 in [word.find(keyword) for word in title.split()] or keyword == submission.link_flair_text.lower():
                         posts.append(submission)
                         break
         time.sleep(2)            

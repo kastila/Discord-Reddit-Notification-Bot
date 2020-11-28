@@ -145,6 +145,8 @@ class GetRedditPost(commands.Cog):
         for subReddit in guilds[index]['search']:
             if guilds[index]['search'][subReddit] == {'Everything*':None}:
                 msg += f"r/{str(subReddit)}: Searching all posts*\n"
+            elif not guilds[index]['search'][subReddit]:
+                msg += f"r/{str(subReddit)}: No keywords given\n"
             else:
                 msg += f"r/{str(subReddit)}: {str(guilds[index]['search'][subReddit])}\n"
 
