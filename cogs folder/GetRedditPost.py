@@ -42,7 +42,7 @@ class GetRedditPost(commands.Cog):
                             if c in word:
                                 word = word.replace(c,"")
                         guilds[index]['search'][subName].append(word)
-                await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+                await ctx.send("Now searching in these subreddits: " + str(guilds[index]["search"].keys())[10:-1])
             else:
                 await ctx.send("Already searching in r/" + subReddit)
         else:
@@ -61,7 +61,7 @@ class GetRedditPost(commands.Cog):
         try:
             del guilds[index]['search'][subReddit]
             await ctx.send( "Removed r/" + "from search\n" 
-                            "Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+                            "Now searching in these subreddits: " + str(guilds[index]["search"].keys())[10:-1])
         except KeyError:
             await ctx.send("Was not searching in r/" + subReddit)
 
@@ -78,10 +78,10 @@ class GetRedditPost(commands.Cog):
         if subName:
             if not(subName in guilds[index]['search']):
                 guilds[index]['search'][subName] = {'Everything*':None}
-                await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+                await ctx.send("Now searching in these subreddits: " + str(guilds[index]["search"].keys())[10:-1])
             elif guilds[index]['search'][subName] != {'everything*':None}:
                 guilds[index]['search'][subName] = {'Everything*':None}
-                await ctx.send("Now searching in these subreddits:" + str(guilds[index]["search"].keys())[10:-1])
+                await ctx.send("Now searching in these subreddits: " + str(guilds[index]["search"].keys())[10:-1])
             else:
                 await ctx.send("Already searching all new posts in r/" + subReddit)
         else:
