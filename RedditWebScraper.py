@@ -43,7 +43,6 @@ def ScrapePosts(sub, keywords):
                             break
         time.sleep(2)            
     except Exception: 
-        raise error
         time.sleep(5)
     return posts
 
