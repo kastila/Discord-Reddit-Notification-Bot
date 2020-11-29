@@ -25,7 +25,7 @@ class GetRedditPost(commands.Cog):
             await asyncio.sleep(900)
 
 
-    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name(not case sensitive)> Optional*<keywords(includes flairs)>\ncharacters []{}()*_, will be omitited from keywords\nReddit emojis can be added to keywords with the following format :<name of emoji>:')
+    @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name(not case sensitive)> Optional*<keywords(includes flairs)>\ncharacters []{}()*_,~ will be omitited from keywords\nReddit emojis can be added to keywords with the following format :<name of emoji>:')
     async def addSubreddit(self,ctx,subReddit,*keyWords):
         index,guilds = getGuildsInJson(ctx.guild.id) 
         
@@ -35,7 +35,7 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subName] = []
                 for word in keyWords:
                     if not(word in guilds[index]['search'][subName]):
-                        for c in "[]{}()*_,":
+                        for c in "[]{}()*_,~":
                             if c in word:
                                 word = word.replace(c,"")
                         if word:
@@ -84,7 +84,7 @@ class GetRedditPost(commands.Cog):
         with open('guilds.json','w') as file:
             json.dump(guilds,file,indent = 2)
 
-    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name(case sensitive)> <keyterms to add(includes flairs)>\ncharacters []{}()*_, will be omitited from keywords\nReddit emojis can be added to keywords with the following format :<name of emoji>:')
+    @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name(case sensitive)> <keyterms to add(includes flairs)>\ncharacters []{}()*_,~ will be omitited from keywords\nReddit emojis can be added to keywords with the following format :<name of emoji>:')
     async def addKeywords(self,ctx,subReddit,*keyWords):
         index,guilds = getGuildsInJson(ctx.guild.id)
 
@@ -93,7 +93,7 @@ class GetRedditPost(commands.Cog):
                 guilds[index]['search'][subReddit] = []
             for word in keyWords:
                 if not(word in guilds[index]['search'][subReddit]):
-                    for c in "[]{}()*_,":
+                    for c in "[]{}()*_,~":
                             if c in word:
                                 word = word.replace(c,"")
                     if word:

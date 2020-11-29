@@ -25,7 +25,7 @@ def ScrapePosts(sub, keywords):
             else:
                 for keyword in keywords:
                     title = submission.title.lower()
-                    for c in "\"[]{}()*_,":
+                    for c in "\"[]{}()*_,~":
                         if c in title:
                             title = title.replace(c," ")
 
@@ -34,7 +34,7 @@ def ScrapePosts(sub, keywords):
                         break
                     elif submission.link_flair_text:
                         flair = submission.link_flair_text.lower()
-                        for c in "\"[]{}()*_,":
+                        for c in "\"[]{}()*_,~":
                             if c in flair:
                                 flair = flair.replace(c," ")
                         flair.strip()
