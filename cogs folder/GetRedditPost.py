@@ -128,7 +128,7 @@ class GetRedditPost(commands.Cog):
         index,guilds = getGuildsInJson(ctx.guild.id)
         channelName = self.client.get_channel(guilds[index]['textChannel']).name
 
-        msg = f"Sending post to text channel [{channelName}]\n"
+        msg = f"Sending posts to text channel [{channelName}]\n"
         for subReddit in guilds[index]['search']:
             if guilds[index]['search'][subReddit] == {'Everything*':None}:
                 msgAdd = f"r/{str(subReddit)}: Searching all posts*\n"
