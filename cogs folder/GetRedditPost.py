@@ -39,7 +39,7 @@ class GetRedditPost(commands.Cog):
                             if c in word:
                                 word = word.replace(c,"")
                         if word:
-                            guilds[index]['search'][subName].append(word)
+                            guilds[index]['search'][subName].append(word.lower().strip())
                 await ctx.send("Now searching in these subreddits: " + str(guilds[index]["search"].keys())[10:-1])
             else:
                 await ctx.send("Already searching in r/" + subReddit)
@@ -97,7 +97,7 @@ class GetRedditPost(commands.Cog):
                             if c in word:
                                 word = word.replace(c,"")
                     if word:
-                        guilds[index]['search'][subReddit].append(word.lower())
+                        guilds[index]['search'][subReddit].append(word.lower().strip())
             await ctx.send("Search keyWords updated: r/" + subReddit + " " + str(guilds[index]["search"][subReddit]))
         else:
             await ctx.send("Was not searching in r/" + subReddit )
