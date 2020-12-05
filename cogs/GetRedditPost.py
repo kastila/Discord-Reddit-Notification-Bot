@@ -62,8 +62,7 @@ class GetRedditPost(commands.Cog):
         try:
             del guild['search'][subName]
             saveInMongoDB(guild)
-            await ctx.send( f"""Removed r/{subName}from search \
-                            \nNow searching in these subreddits: {str(guild['search'].keys())[10:-1]}""")
+            await ctx.send( f"Removed r/{subName}from search \nNow searching in these subreddits: {str(guild['search'].keys())[10:-1]}")
         except KeyError:
             await ctx.send("Was not searching in r/{subReddit}")
 
