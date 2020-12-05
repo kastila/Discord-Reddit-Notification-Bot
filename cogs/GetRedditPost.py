@@ -131,9 +131,9 @@ class GetRedditPost(commands.Cog):
         for subReddit in guild['search']:
             channelName = self.client.get_channel(guild['search'][subReddit]['textChannel']).name
             if guild['search'][subReddit]['keyWords'] == {'Everything*':None}:
-                msgAdd = f"r/{str(subReddit)}: Searching all posts*\t | Text channel: {channelName}\n"
+                msgAdd = f"r/{str(subReddit)}: Searching all posts* | Text channel: {channelName}\n"
             elif not guild['search'][subReddit]['keyWords']:
-                msgAdd = f"r/{str(subReddit)}: No keywords given\t | Text channel: {channelName}\n"
+                msgAdd = f"r/{str(subReddit)}: No keywords given | Text channel: {channelName}\n"
             else:
                 msgAdd = f"r/{str(subReddit)}: {str(guild['search'][subReddit]['keyWords'])} | Text channel: {channelName}\n"
 
