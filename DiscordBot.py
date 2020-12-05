@@ -42,7 +42,7 @@ async def on_guild_join(guild):
                 }
             collections.insert(info)
 
-            await channel.send('Thanks for using Reddit Post Alert Bot\n type !help for a list of commands')   
+            await channel.send('Thanks for using Reddit Post Alert Bot\nType !help for a list of commands')   
         except IndexError:
             to_leave = client.get_guild(guild.id)
             await to_leave.leave()
