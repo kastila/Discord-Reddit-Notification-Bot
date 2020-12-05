@@ -113,7 +113,7 @@ class GetRedditPost(commands.Cog):
             if guild['search'][subName]['keyWords'] != {'Everything*':None}:
                 for word in keyWords:
                     if word.lower() in guild['search'][subName]['keyWords']:
-                        guilds[index]['search'][subName].remove(word.lower())
+                        guild['search'][subName].remove(word.lower())
                 saveInMongoDB(guild)
                 await ctx.send(f"Search keyWords updated for r/{subName}: {guild['search'][subName]['keyWords']}")
             else:
@@ -135,7 +135,7 @@ class GetRedditPost(commands.Cog):
             elif not guild['search'][subReddit]['keyWords']:
                 msgAdd = f"r/{str(subReddit)}: No keywords given\t | Text channel: {channelName}\n"
             else:
-                msgAdd = f"r/{str(subReddit)}: {str(guild['search'][subReddit]['keyWords'])}\t | Text channel: {channelName}\n"
+                msgAdd = f"r/{str(subReddit)}: {str(guild['search'][subReddit]['keyWords'])} | Text channel: {channelName}\n"
 
             if(len(msg) > 2000):
                 await ctx.send(msg)
