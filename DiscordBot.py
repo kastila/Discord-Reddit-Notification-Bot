@@ -6,7 +6,7 @@ from pymongo import MongoClient
 
 MongoDBString = os.getenv('MONGODB_STRING')
 botID = os.getenv('DISCORD_BOT_ID')
-client = commands.Bot(command_prefix='!')
+client = commands.Bot(command_prefix='!',intents=discord.Intents().all())
 
 @client.event
 async def on_ready():
@@ -63,13 +63,14 @@ async def on_guild_channel_delete(channel):
         channel1 = client.get_channel(channel.guild.text_channels[0].id)
         await channel1.send(f"Text channel feeds for {affectedSubs.rstrip(' ,')} has been deleted. Please update with new text channel or remove them from search")
     except IndexError:
+        owner = client.get_user(channel.guild.owner_id)
+        await owner.send(f"I have left your guild [{channel.guild.name}] due no text channels. Invite me again if you still need my services.")
+
         await on_guild_remove(channel.guild)
         to_leave = client.get_guild(channel.guild.id)
         await to_leave.leave()
         
-        owner = client.get_user(channel.guild.owner_id)
-        await owner.send(f"I have left your guild [{channel.guild.name}] due no text channels. Invite me again if you still need my services.")
-
+        
     cluster.close()
 
 def connectMongoDB():
