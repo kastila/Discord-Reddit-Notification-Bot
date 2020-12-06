@@ -54,8 +54,33 @@ async def on_guild_remove(guild):
     cluster = MongoClient(MongoDBString)
     db = cluster['discordbot']
     collections = db['guildsData']
-
+    
     collections.delete_many({'guildID':guild.id})
+
+    cluster.close()
+
+@client.event
+async def on_guild_channel_delete(channel):
+    cluster = MongoClient(MongoDBString)
+    db = cluster['discordbot']
+    collections = db['guildsData']
+
+    guildFound = collections.find_one({"guildID":channel.guild.id})
+    affectedSubs = ""
+    for sub in guildFound['search'].items():
+        if sub[1]['textChannel'] == channel.id:
+            affectedSubs += (f"r/{sub[0]}, ")
+
+    try:
+        channel1 = client.get_channel(channel.guild.text_channels[0].id)
+        await channel1.send(f"Text channel feeds for {affectedSubs.rstrip(' ,')} has been deleted. Please update with new text channel or remove them from search")
+    except IndexError:
+        await on_guild_remove(channel.guild)
+        to_leave = client.get_guild(channel.guild.id)
+        await to_leave.leave()
+        
+        owner = client.get_user(channel.guild.owner_id)
+        await owner.send(f"I have left your guild [{channel.guild.name}] due no text channels. Invite me again if you still need my services.")
 
     cluster.close()
 

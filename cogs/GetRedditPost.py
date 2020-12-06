@@ -20,10 +20,11 @@ class GetRedditPost(commands.Cog):
             collections = db['guildsData']
 
             for guild in self.client.guilds:
-                guild = collections.find_one({"guildID":guild.id})
-                for sub in guild['search'].items():
+                guildInfo = collections.find_one({"guildID":guild.id})
+                for sub in guildInfo['search'].items():
                     channel = self.client.get_channel(sub[1]['textChannel'])
-                    await findPosts(sub[0],sub[1]['keyWords'],channel)
+                    if channel:
+                        await findPosts(sub[0],sub[1]['keyWords'],channel)
 
             cluster.close()
             await asyncio.sleep(900)
@@ -50,7 +51,7 @@ class GetRedditPost(commands.Cog):
         elif subName is None:
             await ctx.send(f"r/{subReddit} not found")
         elif channel is None:
-            await ctx.send(f"Text channel {textChannelName} not found")
+            await ctx.send(f"Text channel [{textChannelName}] not found")
        
 
 
@@ -112,7 +113,7 @@ class GetRedditPost(commands.Cog):
             if guild['search'][subName]['keyWords'] != {'Everything*':None}:
                 for word in keyWords:
                     if word.lower() in guild['search'][subName]['keyWords']:
-                        guild['search'][subName].remove(word.lower())
+                        guild['search'][subName]['keyWords'].remove(word.lower())
                 saveInMongoDB(guild)
                 await ctx.send(f"Search keyWords updated for r/{subName}: {guild['search'][subName]['keyWords']}")
             else:
@@ -160,7 +161,7 @@ class GetRedditPost(commands.Cog):
         elif not subName:
             await ctx.send(f"Currently not searching in r/{subReddit}")
         else:
-            await ctx.send(f"Channel {channelName} not Found")
+            await ctx.send(f"Text channel [{channelName}] not Found")
 
     @commands.Cog.listener()
     async def on_command_error(self,ctx, error):
@@ -172,15 +173,13 @@ class GetRedditPost(commands.Cog):
             raise error
     
 async def findPosts(subReddit,keyWords,channel):
-    try:
-        history =  [ msg.content for msg in await channel.history(limit = 1000).flatten()]
-        posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
-        for p in posts:
-            line = f"r/{subReddit}: {p.title} {p.url}"
-            if line not in history:
-                await channel.send(line)
-    except AttributeError:
-        pass              
+    history =  [ msg.content for msg in await channel.history(limit = 1000).flatten()]
+    posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
+    for p in posts:
+        line = f"r/{subReddit}: {p.title} {p.url}"
+        if line not in history:
+            await channel.send(line)
+              
         
 def getGuildFromMongoDB(guildID):
     cluster = MongoClient(MongoDBString)
