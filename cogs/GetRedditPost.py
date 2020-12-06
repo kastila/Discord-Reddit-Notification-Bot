@@ -130,7 +130,11 @@ class GetRedditPost(commands.Cog):
 
         msg = ""
         for subReddit in guild['search']:
-            channelName = self.client.get_channel(guild['search'][subReddit]['textChannel']).name
+            try:
+                channelName = self.client.get_channel(guild['search'][subReddit]['textChannel']).name
+            except AttributeError:
+                channelName = "None* Please update with new text channel or remove them from search"
+
             if guild['search'][subReddit]['keyWords'] == {'Everything*':None}:
                 msgAdd = f"r/{str(subReddit)}: Searching all posts* | Text channel: {channelName}\n"
             elif not guild['search'][subReddit]['keyWords']:
