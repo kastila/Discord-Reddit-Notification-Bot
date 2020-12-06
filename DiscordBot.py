@@ -12,10 +12,7 @@ client = commands.Bot(command_prefix='!')
 async def on_ready():
     print('Bot ready')
 
-    cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
-
+    cluster, collections = connectMongoDB()
     for guild in client.guilds:
         guildFound = collections.find_one({"guildID":guild.id})
         if not guildFound:
@@ -29,10 +26,7 @@ async def on_ready():
 
 @client.event
 async def on_guild_join(guild):
-        cluster = MongoClient(MongoDBString)
-        db = cluster['discordbot']
-        collections = db['guildsData']
-
+        cluster, collections = connectMongoDB()
         try:
             channel = client.get_channel(guild.text_channels[0].id)
 
@@ -51,20 +45,14 @@ async def on_guild_join(guild):
 
 @client.event
 async def on_guild_remove(guild):
-    cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
-    
+    cluster, collections = connectMongoDB()
     collections.delete_many({'guildID':guild.id})
 
     cluster.close()
 
 @client.event
 async def on_guild_channel_delete(channel):
-    cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
-
+    cluster, collections = connectMongoDB()
     guildFound = collections.find_one({"guildID":channel.guild.id})
     affectedSubs = ""
     for sub in guildFound['search'].items():
@@ -83,6 +71,12 @@ async def on_guild_channel_delete(channel):
         await owner.send(f"I have left your guild [{channel.guild.name}] due no text channels. Invite me again if you still need my services.")
 
     cluster.close()
+
+def connectMongoDB():
+    cluster = MongoClient(MongoDBString)
+    db = cluster['discordbot']
+    collections = db['guildsData']
+    return cluster, collections
 
 for file in os.listdir('cogs'):
     if file.endswith('.py'):

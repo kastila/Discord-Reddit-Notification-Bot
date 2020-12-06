@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import RedditWebScraper
 
 MongoDBString = os.getenv('MONGODB_STRING')
+
 class GetRedditPost(commands.Cog):
 
     def __init__(self, client):
@@ -180,7 +181,6 @@ async def findPosts(subReddit,keyWords,channel):
         if line not in history:
             await channel.send(line)
               
-        
 def getGuildFromMongoDB(guildID):
     cluster = MongoClient(MongoDBString)
     db = cluster['discordbot']
