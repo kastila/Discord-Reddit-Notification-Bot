@@ -18,14 +18,17 @@ def ScrapePosts(sub, keywords):
 
         print("reddit script running")
 
-        # checks for any new post
         for submission in subreddit.new(limit = 35):
-            if(keywords == {'Everything*':None}):
+            if keywords == {'Everything*':None}:
                 posts.append(submission)
             else:
                 for keyword in keywords:
                     title = cleanTitle(submission.title)
-                    if True in [word.startswith(keyword) for word in title.split()]:
+                    if len(keyword) == 1:
+                        if True in [word == keyword for word in title.split()] :
+                            posts.append(submission)
+                            break
+                    elif True in [word.startswith(keyword) for word in title.split()]:
                         posts.append(submission)
                         break
                     elif submission.link_flair_text:

@@ -6,7 +6,8 @@ from pymongo import MongoClient
 
 MongoDBString = os.getenv('MONGODB_STRING')
 botID = os.getenv('DISCORD_BOT_ID')
-client = commands.Bot(command_prefix='!',intents=discord.Intents().all())
+
+client = commands.Bot(command_prefix='!',intents=discord.Intents.all())
 
 @client.event
 async def on_ready():
@@ -23,6 +24,7 @@ async def on_ready():
             collections.insert(info)
 
     cluster.close()
+    client.get_cog('GetRedditPost').searchPosts.start()
 
 @client.event
 async def on_guild_join(guild):

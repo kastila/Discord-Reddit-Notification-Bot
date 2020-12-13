@@ -1,7 +1,7 @@
 import discord
 import os
 import asyncio
-from discord.ext import commands
+from discord.ext import commands,tasks
 from pymongo import MongoClient
 import RedditWebScraper
 
@@ -12,23 +12,20 @@ class GetRedditPost(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        
-        while True:
-            cluster = MongoClient(MongoDBString)
-            db = cluster['discordbot']
-            collections = db['guildsData']
+    @tasks.loop(minutes = 20.0)
+    async def searchPosts(self):
+        cluster = MongoClient(MongoDBString)
+        db = cluster['discordbot']
+        collections = db['guildsData']
 
-            for guild in self.client.guilds:
-                guildInfo = collections.find_one({"guildID":guild.id})
-                for sub in guildInfo['search'].items():
-                    channel = self.client.get_channel(sub[1]['textChannel'])
-                    if channel:
-                        await findPosts(sub[0],sub[1]['keyWords'],channel)
+        for guild in self.client.guilds:
+            guildInfo = collections.find_one({"guildID":guild.id})
+            for sub in guildInfo['search'].items():
+                channel = self.client.get_channel(sub[1]['textChannel'])
+                if channel:
+                    await findPosts(sub[0],sub[1]['keyWords'],channel)
 
-            cluster.close()
-            await asyncio.sleep(900)
+        cluster.close()
 
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
