@@ -38,10 +38,9 @@ class GetRedditPost(commands.Cog):
             if not(subName in guild['search']):
                 guild['search'][subName] = {'textChannel':channel.id, 'keyWords':[]}
                 for word in keyWords:
-                    if not(word in guild['search'][subName]['keyWords']):
-                        word = RedditWebScraper.cleanWord(word)
-                        if word:
-                            guild['search'][subName]['keyWords'].append(word)
+                    word = RedditWebScraper.cleanWord(word)
+                    if word not in guild['search'][subName]['keyWords'] and word:
+                        guild['search'][subName]['keyWords'].append(word)
                 saveInMongoDB(guild)
                 await ctx.send(f"Now searching in r/{subName} with search terms {guild['search'][subName]['keyWords']} and sending to text channel [{textChannelName}]")
             else:
@@ -91,10 +90,9 @@ class GetRedditPost(commands.Cog):
             if guild['search'][subName]['keyWords'] == {'Everything*':None}:
                 guild['search'][subName]['keyWords'] = []
             for word in keyWords:
-                if not(word in guild['search'][subName]['keyWords']):
-                    word = RedditWebScraper.cleanWord(word)
-                    if word:
-                        guild['search'][subName]['keyWords'].append(word)
+                word = RedditWebScraper.cleanWord(word)
+                if word not in guild['search'][subName]['keyWords'] and word:
+                    guild['search'][subName]['keyWords'].append(word)
             saveInMongoDB(guild)
             await ctx.send(f"Search keyWords updated: r/{subName}: {str(guild['search'][subName]['keyWords'])}")
         elif not keyWords:
