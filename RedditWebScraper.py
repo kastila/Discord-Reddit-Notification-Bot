@@ -25,10 +25,10 @@ def ScrapePosts(sub, keywords):
                 for keyword in keywords:
                     title = cleanTitle(submission.title)
                     if len(keyword) == 1:
-                        if True in [word == keyword for word in title.split()] :
+                        if True in [keyword == word for word in title.split()]:
                             posts.append(submission)
                             break
-                    elif True in [word.startswith(keyword) for word in title.split()]:
+                    elif True in [word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es")) for word in title.split()]:
                         posts.append(submission)
                         break
                     elif submission.link_flair_text:
@@ -36,10 +36,10 @@ def ScrapePosts(sub, keywords):
                         if keyword == flair:
                             posts.append(submission)
                             break
-        time.sleep(2)            
+        time.sleep(1)            
     except Exception as error: 
         raise error
-        time.sleep(5)
+        time.sleep(1)
     return posts
 
 def getSubredditName(sub):

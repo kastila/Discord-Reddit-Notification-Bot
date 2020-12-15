@@ -72,7 +72,6 @@ async def on_guild_channel_delete(channel):
         to_leave = client.get_guild(channel.guild.id)
         await to_leave.leave()
         
-        
     cluster.close()
 
 def connectMongoDB():
