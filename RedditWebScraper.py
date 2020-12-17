@@ -12,34 +12,30 @@ def logIn():
 
 def ScrapePosts(sub, keywords):
     reddit = logIn()
+    subreddit = reddit.subreddit(sub)
+
+    print("reddit script running")
     posts = []
-    try:
-        subreddit = reddit.subreddit(sub)
-
-        print("reddit script running")
-
-        for submission in subreddit.new(limit = 35):
-            if keywords == {'Everything*':None}:
-                posts.append(submission)
-            else:
-                for keyword in keywords:
-                    title = cleanTitle(submission.title)
-                    if len(keyword) == 1:
-                        if True in [keyword == word for word in title.split()]:
-                            posts.append(submission)
-                            break
-                    elif True in [word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es")) for word in title.split()]:
+    for submission in subreddit.new(limit = 35):
+        if keywords == {'Everything*':None}:
+            posts.append(submission)
+        else:
+            for keyword in keywords:
+                title = cleanTitle(submission.title)
+                if len(keyword) == 1:
+                    if True in [keyword == word for word in title.split()]:
                         posts.append(submission)
                         break
-                    elif submission.link_flair_text:
-                        flair = cleanTitle(submission.link_flair_text)
-                        if keyword == flair:
-                            posts.append(submission)
-                            break
-        time.sleep(1)            
-    except Exception as error: 
-        raise error
-        time.sleep(1)
+                elif True in [word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es")) for word in title.split()]:
+                    posts.append(submission)
+                    break
+                elif submission.link_flair_text:
+                    flair = cleanTitle(submission.link_flair_text)
+                    if keyword == flair:
+                        posts.append(submission)
+                        break
+    time.sleep(1)    
+
     return posts
 
 def getSubredditName(sub):

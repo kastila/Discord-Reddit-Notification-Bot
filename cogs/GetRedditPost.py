@@ -27,7 +27,6 @@ class GetRedditPost(commands.Cog):
 
         cluster.close()
 
-
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
     async def addSubreddit(self,ctx,subReddit:str,textChannelName:str,*keyWords:str):
         guild = getGuildFromMongoDB(ctx.guild.id) 
@@ -50,8 +49,6 @@ class GetRedditPost(commands.Cog):
         elif channel is None:
             await ctx.send(f"Text channel [{textChannelName}] not found")
        
-
-
     @commands.command(description="Removes a subReddit from the search", usage ="<Subreddit name>")
     async def removeSubreddit(self,ctx,subReddit:str):
         guild = getGuildFromMongoDB(ctx.guild.id)
@@ -63,7 +60,6 @@ class GetRedditPost(commands.Cog):
             await ctx.send( f"Removed r/{subName}from search \nNow searching in these subreddits: {str(guild['search'].keys())[10:-1]}")
         except KeyError:
             await ctx.send("Was not searching in r/{subReddit}")
-
 
     @commands.command(description='Changes search critera to post all new posts from a subreddit' ,usage ='<Subreddit name>')
     async def searchAllNew(self,ctx,subReddit:str):
@@ -173,13 +169,19 @@ class GetRedditPost(commands.Cog):
             raise error
     
 async def findPosts(subReddit,keyWords,channel):
-    history =  [ msg.content for msg in await channel.history(limit = 1000).flatten()]
+    history = []
+    for textChannel in channel.guild.text_channels:
+        history +=  await textChannel.history(limit = 200).map(transform).flatten()
+
     posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
     for p in posts:
         line = f"r/{subReddit}: {p.title} {p.url}"
         if line not in history:
             await channel.send(line)
               
+def transform(message):
+    return message.content
+    
 def getGuildFromMongoDB(guildID):
     cluster = MongoClient(MongoDBString)
     db = cluster['discordbot']
