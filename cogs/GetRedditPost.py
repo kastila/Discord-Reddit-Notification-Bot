@@ -19,11 +19,13 @@ class GetRedditPost(commands.Cog):
         collections = db['guildsData']
 
         for guild in self.client.guilds:
-            guildInfo = collections.find_one({"guildID":guild.id})
+            guildInfo = collections.find_one({'guildID':guild.id})
+            postIdsToAdd = []
             for sub in guildInfo['search'].items():
                 channel = self.client.get_channel(sub[1]['textChannel'])
                 if channel:
-                    await findPosts(sub[0],sub[1]['keyWords'],channel)
+                    postIdsToAdd = await findPosts(sub[0],sub[1]['keyWords'],channel,guildInfo['postIDs'])
+            collections.update_one({'guildID':guild.id},{'$push':{'postIDs':{'$each':postIdsToAdd,'$slice':-1000}}})
 
         cluster.close()
 
@@ -153,7 +155,7 @@ class GetRedditPost(commands.Cog):
         if channel and subName:
             guild['search'][subName]['textChannel'] = channel.id
             saveInMongoDB(guild)
-            await ctx.send(f"Channel {str(channel.name)} is now set currently set to receive posts")
+            await ctx.send(f"Text channel {str(channel.name)} is now set currently set to receive posts")
         elif not subName:
             await ctx.send(f"Currently not searching in r/{subReddit}")
         else:
@@ -168,16 +170,16 @@ class GetRedditPost(commands.Cog):
         else:
             raise error
     
-async def findPosts(subReddit,keyWords,channel):
-    history = []
-    for textChannel in channel.guild.text_channels:
-        history +=  await textChannel.history(limit = 200).map(transform).flatten()
-
+async def findPosts(subReddit,keyWords,channel, postIds):
     posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
+    addedPostIDs = []
     for p in posts:
         line = f"r/{subReddit}: {p.title} {p.url}"
-        if line not in history:
+        if p.id not in postIds:
             await channel.send(line)
+            addedPostIDs.append(p.id)
+
+    return addedPostIDs
               
 def transform(message):
     return message.content

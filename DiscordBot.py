@@ -18,8 +18,9 @@ async def on_ready():
         guildFound = collections.find_one({"guildID":guild.id})
         if not guildFound:
             info = {
-                "guildID":guild.id,
-                "search":{}
+                'guildID':guild.id,
+                'search':{},
+                'postIDs':[]
                     }
             collections.insert(info)
 
@@ -33,8 +34,9 @@ async def on_guild_join(guild):
             channel = client.get_channel(guild.text_channels[0].id)
 
             info = {
-            "guildID":guild.id,
-            "search":{}
+            'guildID':guild.id,
+            'search':{},
+            'postIDs':[]
                 }
             collections.insert(info)
 
