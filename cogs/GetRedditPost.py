@@ -1,6 +1,5 @@
 import discord
 import os
-import asyncio
 from discord.ext import commands,tasks
 from pymongo import MongoClient
 import RedditWebScraper
@@ -181,9 +180,6 @@ async def findPosts(subReddit,keyWords,channel, postIds):
 
     return addedPostIDs
               
-def transform(message):
-    return message.content
-    
 def getGuildFromMongoDB(guildID):
     cluster = MongoClient(MongoDBString)
     db = cluster['discordbot']
