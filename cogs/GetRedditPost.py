@@ -1,5 +1,5 @@
-import discord
 import os
+import discord
 from discord.ext import commands,tasks
 from pymongo import MongoClient
 import RedditWebScraper
@@ -10,6 +10,12 @@ class GetRedditPost(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+
+    def cleanWord(word):
+        for c in '\"[]{}()*_,~':
+            if c in word:
+                word = word.replace(c,"")
+        return word.lower()
 
     @tasks.loop(minutes = 20.0)
     async def searchPosts(self):
@@ -29,7 +35,7 @@ class GetRedditPost(commands.Cog):
         cluster.close()
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
-    async def addSubreddit(self,ctx,subReddit:str,textChannelName:str,*keyWords:str):
+    async def addSubreddit(self,ctx,subReddit:str,textChannelName:str,*keyWords:cleanWord):
         guild = getGuildFromMongoDB(ctx.guild.id) 
         subName = RedditWebScraper.getSubredditName(subReddit)
         channel = discord.utils.get(ctx.guild.channels, name=textChannelName)
@@ -38,7 +44,6 @@ class GetRedditPost(commands.Cog):
             if not(subName in guild['search']):
                 guild['search'][subName] = {'textChannel':channel.id, 'keyWords':[]}
                 for word in keyWords:
-                    word = RedditWebScraper.cleanWord(word)
                     if word not in guild['search'][subName]['keyWords'] and word:
                         guild['search'][subName]['keyWords'].append(word)
                 saveInMongoDB(guild)
@@ -79,7 +84,7 @@ class GetRedditPost(commands.Cog):
 
 
     @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
-    async def addKeywords(self,ctx,subReddit:str,*keyWords:str):
+    async def addKeywords(self,ctx,subReddit:str,*keyWords:cleanWord):
         guild = getGuildFromMongoDB(ctx.guild.id)
         subName = RedditWebScraper.getSubredditName(subReddit)
 
@@ -87,7 +92,6 @@ class GetRedditPost(commands.Cog):
             if guild['search'][subName]['keyWords'] == {'Everything*':None}:
                 guild['search'][subName]['keyWords'] = []
             for word in keyWords:
-                word = RedditWebScraper.cleanWord(word)
                 if word not in guild['search'][subName]['keyWords'] and word:
                     guild['search'][subName]['keyWords'].append(word)
             saveInMongoDB(guild)

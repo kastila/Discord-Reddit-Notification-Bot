@@ -46,13 +46,7 @@ def getSubredditName(sub):
         return subreddit.display_name
     except Exception:
         return None
-
-def cleanWord(word):
-    for c in '\"[]{}()*_,~':
-        if c in word:
-            word = word.replace(c,"")
-    return word.lower().strip()
-
+        
 def cleanTitle(title):
     for c in "\"[]{}()*_,~":
         if c in title:
