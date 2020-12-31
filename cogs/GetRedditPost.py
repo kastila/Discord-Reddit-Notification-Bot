@@ -140,7 +140,7 @@ class GetRedditPost(commands.Cog):
 
             if(len(msg + msgAdd) > 1994):
                 await ctx.send(msg + '```')
-                msg = '```' msgAdd
+                msg = '```' + msgAdd
             else:
                 msg += msgAdd
 
