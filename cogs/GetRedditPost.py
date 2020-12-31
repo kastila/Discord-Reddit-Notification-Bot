@@ -41,19 +41,19 @@ class GetRedditPost(commands.Cog):
         channel = discord.utils.get(ctx.guild.channels, name=textChannelName)
 
         if subName and channel:
-            if not(subName in guild['search']):
+            if subName not in guild['search']:
                 guild['search'][subName] = {'textChannel':channel.id, 'keyWords':[]}
                 for word in keyWords:
                     if word not in guild['search'][subName]['keyWords'] and word:
                         guild['search'][subName]['keyWords'].append(word)
                 saveInMongoDB(guild)
-                await ctx.send(f"Now searching in r/{subName} with search terms {guild['search'][subName]['keyWords']} and sending to text channel [{textChannelName}]")
+                await ctx.send(f"Now searching in r/{subName} with search terms *{str(guild['search'][subName]['keyWords']).strip('[]')}* and sending to text channel *{textChannelName}*")
             else:
                 await ctx.send(f"Already searching in r/{subName}")
         elif subName is None:
             await ctx.send(f"r/{subReddit} not found")
         elif channel is None:
-            await ctx.send(f"Text channel [{textChannelName}] not found")
+            await ctx.send(f"Text channel *{textChannelName}* not found")
        
     @commands.command(description="Removes a subReddit from the search", usage ="<Subreddit name>")
     async def removeSubreddit(self,ctx,subReddit:str):
@@ -63,7 +63,7 @@ class GetRedditPost(commands.Cog):
         try:
             del guild['search'][subName]
             saveInMongoDB(guild)
-            await ctx.send( f"Removed r/{subName}from search \nNow searching in these subreddits: {str(guild['search'].keys())[10:-1]}")
+            await ctx.send( f"Removed r/{subName} from search \nNow searching in these subreddits: {str(guild['search'].keys())[11:-2]}")
         except KeyError:
             await ctx.send("Was not searching in r/{subReddit}")
 
@@ -80,7 +80,7 @@ class GetRedditPost(commands.Cog):
             else:
                 await ctx.send(f"Already searching all new posts in r/{subName}")
         else:
-            await ctx.send(f"Currenly not searching in r/{subReddit}\n Use !addSubreddit to add it before using this command")
+            await ctx.send(f"Currenly not searching in r/{subReddit}\n Use *!addSubreddit* to add it before using this command")
 
 
     @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
@@ -95,7 +95,7 @@ class GetRedditPost(commands.Cog):
                 if word not in guild['search'][subName]['keyWords'] and word:
                     guild['search'][subName]['keyWords'].append(word)
             saveInMongoDB(guild)
-            await ctx.send(f"Search keyWords updated: r/{subName}: {str(guild['search'][subName]['keyWords'])}")
+            await ctx.send(f"Search keyWords updated for r/{subName}: {str(guild['search'][subName]['keyWords']).strip('[]')}")
         elif not keyWords:
             await ctx.send(f"No keywords given")
         else:
@@ -112,7 +112,7 @@ class GetRedditPost(commands.Cog):
                     if word.lower() in guild['search'][subName]['keyWords']:
                         guild['search'][subName]['keyWords'].remove(word.lower())
                 saveInMongoDB(guild)
-                await ctx.send(f"Search keyWords updated for r/{subName}: {guild['search'][subName]['keyWords']}")
+                await ctx.send(f"Search keyWords updated for r/{subName}: {str(guild['search'][subName]['keyWords']).strip('[]')}")
             else:
                 await ctx.send(f"Currently searching in all new post in r/{subName}. No keywords to remove")
         elif not keyWords:
@@ -121,10 +121,10 @@ class GetRedditPost(commands.Cog):
             await ctx.send(f"Currently not searching in r/{subReddit}")
 
     @commands.command(description = 'Lists subreddits being searched in and thier respective search keyterms')
-    async def listInfo(self,ctx):
+    async def listSearch(self,ctx):
         guild = getGuildFromMongoDB(ctx.guild.id)
 
-        msg = ""
+        msg = "```"
         for subReddit in guild['search']:
             try:
                 channelName = self.client.get_channel(guild['search'][subReddit]['textChannel']).name
@@ -138,16 +138,16 @@ class GetRedditPost(commands.Cog):
             else:
                 msgAdd = f"r/{str(subReddit)}: {str(guild['search'][subReddit]['keyWords'])} | Text channel: {channelName}\n"
 
-            if(len(msg) > 2000):
-                await ctx.send(msg)
-                msg = msgAdd
+            if(len(msg + msgAdd) > 1994):
+                await ctx.send(msg + '```')
+                msg = '```' msgAdd
             else:
                 msg += msgAdd
 
         if msg:
-            await ctx.send(msg)
+            await ctx.send(msg + '```')
         else:
-            await ctx.send("Currently not searching in any Subreddits. Try !addSubreddit to add one")
+            await ctx.send("Currently not searching in any Subreddits. Try *!addSubreddit* to add one")
 
     @commands.command(description = 'Change channel to send found reddit posts', usage ='<name of channel>')
     async def changeChannelFeed(self,ctx,subReddit:str,textChannelName:str):
@@ -158,11 +158,11 @@ class GetRedditPost(commands.Cog):
         if channel and subName:
             guild['search'][subName]['textChannel'] = channel.id
             saveInMongoDB(guild)
-            await ctx.send(f"Text channel {str(channel.name)} is now set currently set to receive posts")
+            await ctx.send(f"Text channel *{str(channel.name)}* is now set currently set to receive posts")
         elif not subName:
             await ctx.send(f"Currently not searching in r/{subReddit}")
         else:
-            await ctx.send(f"Text channel [{channelName}] not Found")
+            await ctx.send(f"Text channel *{textchannelName}* not Found")
 
     @commands.Cog.listener()
     async def on_command_error(self,ctx, error):
