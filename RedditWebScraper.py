@@ -20,18 +20,17 @@ def ScrapePosts(sub, keywords):
         if keywords == {'Everything*':None}:
             posts.append(submission)
         else:
+            title = cleanText(submission.title).split()
+            flair = cleanText(submission.link_flair_text) if submission.link_flair_text else None
             for keyword in keywords:
-                title = cleanTitle(submission.title)
                 if len(keyword) == 1:
-                    if True in [keyword == word for word in title.split()]:
+                    if any([keyword == word for word in title]):
                         posts.append(submission)
                         break
-                elif True in [word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es")) for word in title.split()]:
+                elif any([word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es?!.")) for word in title]):
                     posts.append(submission)
                     break
-                elif submission.link_flair_text:
-                    flair = cleanTitle(submission.link_flair_text)
-                    if keyword == flair:
+                elif keyword == flair:
                         posts.append(submission)
                         break
     time.sleep(1)    
@@ -47,8 +46,8 @@ def getSubredditName(sub):
     except Exception:
         return None
         
-def cleanTitle(title):
+def cleanText(text):
     for c in "\"[]{}()*_,~":
-        if c in title:
-            title = title.replace(c," ")
-    return title.lower().strip()
+        if c in text:
+            text = text.replace(c," ")
+    return text.lower().strip()

@@ -10,6 +10,9 @@ class GetRedditPost(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.cluster = MongoClient(MongoDBString)
+        self.db = self.cluster['discordbot']
+        self.collections = self.db['guildsData']
 
     def cleanWord(word):
         for c in '\"[]{}()*_,~':
@@ -19,24 +22,18 @@ class GetRedditPost(commands.Cog):
 
     @tasks.loop(minutes = 20.0)
     async def searchPosts(self):
-        cluster = MongoClient(MongoDBString)
-        db = cluster['discordbot']
-        collections = db['guildsData']
-
         for guild in self.client.guilds:
-            guildInfo = collections.find_one({'guildID':guild.id})
+            guildInfo = self.collections.find_one({'guildID':guild.id})
             postIdsToAdd = []
             for sub in guildInfo['search'].items():
                 channel = self.client.get_channel(sub[1]['textChannel'])
                 if channel:
                     postIdsToAdd = await findPosts(sub[0],sub[1]['keyWords'],channel,guildInfo['postIDs'])
-            collections.update_one({'guildID':guild.id},{'$push':{'postIDs':{'$each':postIdsToAdd,'$slice':-1000}}})
-
-        cluster.close()
+            self.collections.update_one({'guildID':guild.id},{'$push':{'postIDs':{'$each':postIdsToAdd,'$slice':-1000}}})
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
     async def addSubreddit(self,ctx,subReddit:str,textChannelName:str,*keyWords:cleanWord):
-        guild = getGuildFromMongoDB(ctx.guild.id) 
+        guild = self.collections.find_one({"guildID":ctx.guild.id}) 
         subName = RedditWebScraper.getSubredditName(subReddit)
         channel = discord.utils.get(ctx.guild.channels, name=textChannelName)
 
@@ -46,7 +43,7 @@ class GetRedditPost(commands.Cog):
                 for word in keyWords:
                     if word not in guild['search'][subName]['keyWords'] and word:
                         guild['search'][subName]['keyWords'].append(word)
-                saveInMongoDB(guild)
+                self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
                 await ctx.send(f"Now searching in r/{subName} with search terms *{str(guild['search'][subName]['keyWords']).strip('[]')}* and sending to text channel *{textChannelName}*")
             else:
                 await ctx.send(f"Already searching in r/{subName}")
@@ -57,25 +54,25 @@ class GetRedditPost(commands.Cog):
        
     @commands.command(description="Removes a subReddit from the search", usage ="<Subreddit name>")
     async def removeSubreddit(self,ctx,subReddit:str):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
 
         try:
             del guild['search'][subName]
-            saveInMongoDB(guild)
+            self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
             await ctx.send( f"Removed r/{subName} from search \nNow searching in these subreddits: {str(guild['search'].keys())[11:-2]}")
         except KeyError:
             await ctx.send("Was not searching in r/{subReddit}")
 
     @commands.command(description='Changes search critera to post all new posts from a subreddit' ,usage ='<Subreddit name>')
     async def searchAllNew(self,ctx,subReddit:str):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
 
         if subName in guild['search']:
             if guild['search'][subName]['keyWords'] != {'Everything*':None}:
                 guild['search'][subName]['keyWords'] = {'Everything*':None}
-                saveInMongoDB(guild)
+                self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
                 await ctx.send(f"Now set to search all new post from r/{subName}")
             else:
                 await ctx.send(f"Already searching all new posts in r/{subName}")
@@ -85,7 +82,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Adds keyterms to a subReddit\'s search critera' ,usage ='<Subreddit name> <keyterms to add(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
     async def addKeywords(self,ctx,subReddit:str,*keyWords:cleanWord):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
 
         if subName in guild['search'] and keyWords:
@@ -94,7 +91,7 @@ class GetRedditPost(commands.Cog):
             for word in keyWords:
                 if word not in guild['search'][subName]['keyWords'] and word:
                     guild['search'][subName]['keyWords'].append(word)
-            saveInMongoDB(guild)
+            self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
             await ctx.send(f"Search keyWords updated for r/{subName}: {str(guild['search'][subName]['keyWords']).strip('[]')}")
         elif not keyWords:
             await ctx.send(f"No keywords given")
@@ -103,7 +100,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description='Remove keyterms from a subReddit\'s search critera',usage ='<Subreddit name(case sensitive)> <keyterms to remove>')
     async def removeKeywords(self,ctx,subReddit:str,*keyWords:str):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
 
         if subName in guild['search'] and keyWords:
@@ -111,7 +108,7 @@ class GetRedditPost(commands.Cog):
                 for word in keyWords:
                     if word.lower() in guild['search'][subName]['keyWords']:
                         guild['search'][subName]['keyWords'].remove(word.lower())
-                saveInMongoDB(guild)
+                self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
                 await ctx.send(f"Search keyWords updated for r/{subName}: {str(guild['search'][subName]['keyWords']).strip('[]')}")
             else:
                 await ctx.send(f"Currently searching in all new post in r/{subName}. No keywords to remove")
@@ -122,7 +119,7 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description = 'Lists subreddits being searched in and thier respective search keyterms')
     async def listSearch(self,ctx):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
 
         msg = "```"
         for subReddit in guild['search']:
@@ -151,13 +148,13 @@ class GetRedditPost(commands.Cog):
 
     @commands.command(description = 'Change channel to send found reddit posts', usage ='<name of channel>')
     async def changeChannelFeed(self,ctx,subReddit:str,textChannelName:str):
-        guild = getGuildFromMongoDB(ctx.guild.id)
+        guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
         channel = discord.utils.get(ctx.guild.channels, name=textChannelName)
 
         if channel and subName:
             guild['search'][subName]['textChannel'] = channel.id
-            saveInMongoDB(guild)
+            self.collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
             await ctx.send(f"Text channel *{str(channel.name)}* is now set currently set to receive posts")
         elif not subName:
             await ctx.send(f"Currently not searching in r/{subReddit}")
@@ -177,27 +174,12 @@ async def findPosts(subReddit,keyWords,channel, postIds):
     posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
     addedPostIDs = []
     for p in posts:
-        line = f"r/{subReddit}: {p.title} {p.url}"
+        line = f"**r/{subReddit}**: {p.title} {p.url}"
         if p.id not in postIds:
             await channel.send(line)
             addedPostIDs.append(p.id)
 
     return addedPostIDs
-              
-def getGuildFromMongoDB(guildID):
-    cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
-    guildFound = collections.find_one({"guildID":guildID})
-    cluster.close()
-    return guildFound
-
-def saveInMongoDB(guild):
-    cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
-    collections.update_one({'guildID':guild['guildID']}, {'$set':{'search':guild['search']}})
-    cluster.close()
 
 def setup(client):
     client.add_cog(GetRedditPost(client))
