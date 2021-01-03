@@ -77,8 +77,7 @@ async def on_guild_channel_delete(channel):
 
 def connectMongoDB():
     cluster = MongoClient(MongoDBString)
-    db = cluster['discordbot']
-    collections = db['guildsData']
+    collections = cluster['discordbot']['guildsData']
     return cluster, collections
 
 for file in os.listdir('cogs'):

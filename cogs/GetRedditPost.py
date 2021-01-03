@@ -11,8 +11,7 @@ class GetRedditPost(commands.Cog):
     def __init__(self, client):
         self.client = client
         self.cluster = MongoClient(MongoDBString)
-        self.db = self.cluster['discordbot']
-        self.collections = self.db['guildsData']
+        self.collections = self.cluster['discordbot']['guildsData']
 
     def cleanWord(word):
         for c in '\"[]{}()*_,~':
@@ -28,7 +27,7 @@ class GetRedditPost(commands.Cog):
             for sub in guildInfo['search'].items():
                 channel = self.client.get_channel(sub[1]['textChannel'])
                 if channel:
-                    postIdsToAdd = await findPosts(sub[0],sub[1]['keyWords'],channel,guildInfo['postIDs'])
+                    postIdsToAdd += await findPosts(sub[0],sub[1]['keyWords'],channel,guildInfo['postIDs'])
             self.collections.update_one({'guildID':guild.id},{'$push':{'postIDs':{'$each':postIdsToAdd,'$slice':-1000}}})
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
