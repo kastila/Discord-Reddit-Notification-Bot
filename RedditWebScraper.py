@@ -27,7 +27,7 @@ def ScrapePosts(sub, keywords):
                     if any([keyword == word for word in title]):
                         posts.append(submission)
                         break
-                elif any([word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es?!.")) for word in title]):
+                elif any([word.startswith(keyword) and len(keyword) >= len(word.rstrip("'es:?!.")) for word in title]):
                     posts.append(submission)
                     break
                 elif keyword == flair:
