@@ -173,7 +173,7 @@ async def findPosts(subReddit,keyWords,channel, postIds):
     posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
     addedPostIDs = []
     for p in posts:
-        line = f"**r/{subReddit}**: {p.title} {p.url}"
+        line = f"**r/{subReddit}**: {p.title}\n{p.url}"
         if p.id not in postIds:
             await channel.send(line)
             addedPostIDs.append(p.id)
