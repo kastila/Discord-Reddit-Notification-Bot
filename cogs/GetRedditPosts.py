@@ -27,7 +27,12 @@ class GetRedditPosts(commands.Cog):
             for sub in guildInfo['search'].items():
                 channel = self.client.get_channel(sub[1]['textChannel'])
                 if channel:
-                    postIdsToAdd += await find_Ids_and_Send(sub[0],sub[1]['keyWords'],channel,guildInfo['postIDs'])
+                    posts = RedditWebScraper.ScrapePosts(sub[0], sub[1]['keyWords'])
+                    for p in posts:
+                        line = f"**r/{sub[0]}**: {p.title}\n{p.url}"
+                        if p.id not in guildInfo['postIDs']:
+                            await channel.send(line)
+                            postIdsToAdd.append(p.id)
             self.collections.update_one({'guildID':guild.id},{'$push':{'postIDs':{'$each':postIdsToAdd,'$slice':-1000}}})
 
     @commands.command(description='Adds a subReddit to search.',usage = '<Subreddit Name> <Text channel name to send posts> Optional*<keywords(includes flairs and emojis)>\ncharacters \"[]{}()*_,~ will be omitited from keywords')
@@ -169,16 +174,5 @@ class GetRedditPosts(commands.Cog):
         else:
             raise error
 
-async def find_Ids_and_Send(subReddit,keyWords,channel, postIds):
-    posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
-    addedPostIDs = []
-    for p in posts:
-        line = f"**r/{subReddit}**: {p.title}\n{p.url}"
-        if p.id not in postIds:
-            await channel.send(line)
-            addedPostIDs.append(p.id)
-
-    return addedPostIDs
-    
 def setup(client):
     client.add_cog(GetRedditPosts(client))
