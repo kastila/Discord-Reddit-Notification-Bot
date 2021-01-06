@@ -24,7 +24,7 @@ async def on_ready():
             collections.insert(info)
 
     cluster.close()
-    client.get_cog('GetRedditPost').searchPosts.start()
+    client.get_cog('GetRedditPosts').searchPosts.start()
 
 @client.event
 async def on_guild_join(guild):

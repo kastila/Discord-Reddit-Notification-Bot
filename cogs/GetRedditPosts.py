@@ -19,17 +19,6 @@ class GetRedditPosts(commands.Cog):
                 word = word.replace(c,"")
         return word.lower()
 
-    async def find_Ids_and_Send(subReddit,keyWords,channel, postIds):
-        posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
-        addedPostIDs = []
-        for p in posts:
-            line = f"**r/{subReddit}**: {p.title}\n{p.url}"
-            if p.id not in postIds:
-                await channel.send(line)
-                addedPostIDs.append(p.id)
-
-        return addedPostIDs
-    
     @tasks.loop(minutes = 20.0)
     async def searchPosts(self):
         for guild in self.client.guilds:
@@ -180,5 +169,16 @@ class GetRedditPosts(commands.Cog):
         else:
             raise error
 
+async def find_Ids_and_Send(subReddit,keyWords,channel, postIds):
+    posts = RedditWebScraper.ScrapePosts(subReddit, keyWords)
+    addedPostIDs = []
+    for p in posts:
+        line = f"**r/{subReddit}**: {p.title}\n{p.url}"
+        if p.id not in postIds:
+            await channel.send(line)
+            addedPostIDs.append(p.id)
+
+    return addedPostIDs
+    
 def setup(client):
     client.add_cog(GetRedditPosts(client))
