@@ -13,12 +13,12 @@ https://discord.com/api/oauth2/authorize?client_id=779968485693980672&permission
 !removeKeywords <Subreddit name(case sensitive)> <keyterms to remove>
 !changeChannelFeed <Subreddit name> <Server Text channel name>
 
-NOTE - characters "[]{}()*_,~ will be omitited from keywords
+#NOTE - characters "[]{}()*_,~ will be omitited from keywords
 ```
 To get notifications of all new posts from a specific subreddit
 ```
 !searchAllNew <Subreddit name>
-Note - will overide any keywords if used on an existing subbreddit that was being monitered
+#NOTE - will overide any keywords if used on an existing subbreddit that was being monitered
 ```
 
 To see which subreddits are being monitored and thier respective search keywords
