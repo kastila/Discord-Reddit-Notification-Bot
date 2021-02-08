@@ -6,7 +6,6 @@ To add it to your private server use the link:
 https://discord.com/api/oauth2/authorize?client_id=779968485693980672&permissions=8&scope=bot
 
 ## Usage
-
 ```
 !addSubreddit <Subreddit Name> <Server Text channel name> Optional*<keywords to search for>
 !removeSubreddit <Subreddit name>
