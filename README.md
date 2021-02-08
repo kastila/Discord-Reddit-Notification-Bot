@@ -2,7 +2,8 @@
 
 Discord bot that sends reddit post links when a new post matches your notification critiera.
 
-To add it to your private server use the link: https://discord.com/api/oauth2/authorize?client_id=779968485693980672&permissions=8&scope=bot
+To add it to your private server use the link:
+https://discord.com/api/oauth2/authorize?client_id=779968485693980672&permissions=8&scope=bot
 
 ## Usage
 
