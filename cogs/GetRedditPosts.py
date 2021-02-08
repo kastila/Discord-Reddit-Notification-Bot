@@ -150,7 +150,7 @@ class GetRedditPosts(commands.Cog):
         else:
             await ctx.send("Currently not searching in any Subreddits. Try *!addSubreddit* to add one")
 
-    @commands.command(description = 'Change channel to send found reddit posts', usage ='<name of channel>')
+    @commands.command(description = 'Change channel to send found reddit posts', usage ='<subreddit name> <text channel name>')
     async def changeChannelFeed(self,ctx,subReddit:str,textChannelName:str):
         guild = self.collections.find_one({"guildID":ctx.guild.id})
         subName = RedditWebScraper.getSubredditName(subReddit)
