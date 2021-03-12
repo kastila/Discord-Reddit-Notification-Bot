@@ -163,7 +163,7 @@ class GetRedditPosts(commands.Cog):
         elif not subName:
             await ctx.send(f"Currently not searching in r/{subReddit}")
         else:
-            await ctx.send(f"Text channel *{textchannelName}* not Found")
+            await ctx.send(f"Text channel *{textChannelName}* not Found")
 
     @commands.Cog.listener()
     async def on_command_error(self,ctx, error):
